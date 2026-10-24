@@ -23,7 +23,10 @@ extension MenuExplorerView {
                         }
                         .frame(minWidth: 54, minHeight: 44)
                         .padding(.horizontal, 4)
-                        .ucmGlassControl(isSelected: isSelected)
+                        .background(
+                            isSelected ? UCMTheme.deepNavy : Color.primary.opacity(0.06),
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])

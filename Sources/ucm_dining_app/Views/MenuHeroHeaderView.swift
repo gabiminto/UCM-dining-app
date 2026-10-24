@@ -65,8 +65,11 @@ public struct MenuHeroHeaderView: View {
                                 .font(.subheadline.weight(.semibold))
                                 .padding(.horizontal, 14)
                                 .frame(minHeight: 44)
-                                .foregroundStyle(isSelected ? .white : .white.opacity(0.9))
-                                .ucmGlassControl(isSelected: isSelected)
+                                .foregroundStyle(isSelected ? UCMTheme.deepNavy : .white)
+                                .background(
+                                    isSelected ? UCMTheme.brightGold : Color.white.opacity(0.12),
+                                    in: Capsule()
+                                )
                         }
                         .buttonStyle(.plain)
                         .accessibilityAddTraits(isSelected ? .isSelected : [])
