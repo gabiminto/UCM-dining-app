@@ -1,0 +1,23 @@
+{
+  "sourceURL": "https://dining.ucmerced.edu/dining-locations-hours/pavilion/dining-center-hours",
+  "pavilion": {
+    "weekday": [
+      { "meal": "Breakfast", "startMinutes": 420, "endMinutes": 600, "icon": "sunrise.fill" },
+      { "meal": "Lunch", "startMinutes": 660, "endMinutes": 900, "icon": "sun.max.fill" },
+      { "meal": "Dinner", "startMinutes": 960, "endMinutes": 1260, "icon": "moon.stars.fill" }
+    ],
+    "weekend": [
+      { "meal": "Breakfast", "startMinutes": 540, "endMinutes": 630, "icon": "sunrise.fill" },
+      { "meal": "Lunch", "startMinutes": 660, "endMinutes": 900, "icon": "sun.max.fill" },
+      { "meal": "Dinner", "startMinutes": 960, "endMinutes": 1260, "icon": "moon.stars.fill" }
+    ]
+  },
+  "ywdc": {
+    "weekday": [
+      { "meal": "Lunch", "startMinutes": 600, "endMinutes": 840, "icon": "sun.max.fill" },
+      { "meal": "Dinner", "startMinutes": 900, "endMinutes": 1200, "icon": "moon.stars.fill" },
+      { "meal": "Late Night", "startMinutes": 1260, "endMinutes": 1440, "icon": "sparkles" }
+    ],
+    "weekend": []
+  }
+}

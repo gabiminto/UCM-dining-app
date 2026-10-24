@@ -1,0 +1,23 @@
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Build products and SwiftPM
+DerivedData/
+.build/
+.swiftpm/
+build/
+
+# macOS
+.DS_Store
+
+# Local configuration and secrets
+*.env
+.env*
+*.xcconfig.local
+
+# Test and profiling artifacts
+*.xcresult
+*.trace
