@@ -26,6 +26,10 @@ public final class DiningViewModel {
     public var errorMessage: String?
     public var isOfflineCachedMode: Bool = false
 
+    /// Hot menu data used to make day and meal changes synchronous after preload.
+    internal var categoryMemoryCache: [String: [MealCategory]] = [:]
+    internal var itemMemoryCache: [String: [MenuItemSummary]] = [:]
+
     internal let apiClient: BigZpoonAPIClient
     internal let cacheStore: MenuCacheStore
     public let dietaryStore: DietaryProfileStore
@@ -157,6 +161,16 @@ public final class DiningViewModel {
     public func setSelectedDay(_ day: DayMenuGroup) {
         selectedDayGroup = day
         selectedStation = .all
+        let key = categoryMemoryKey(locationId: selectedLocation.id, dayId: day.id)
+        guard let categories = categoryMemoryCache[key], !categories.isEmpty else { return }
+
+        mealCategories = categories
+        if selectedCategory == nil || !categories.contains(where: { $0.id == selectedCategory?.id }) {
+            selectedCategory = preferredCategory(from: categories)
+        }
+        if let category = selectedCategory {
+            applyMemoryItems(day: day, category: category)
+        }
     }
 
     public func loadSelectedDay() async {
@@ -172,6 +186,9 @@ public final class DiningViewModel {
     public func setSelectedCategory(_ category: MealCategory) {
         selectedCategory = category
         selectedStation = .all
+        if let day = selectedDayGroup {
+            applyMemoryItems(day: day, category: category)
+        }
     }
 
     public func loadSelectedCategory() async {
@@ -187,5 +204,27 @@ public final class DiningViewModel {
         } else {
             await loadLocationScheduleAndMenu(for: selectedLocation, autoSelectToday: true)
         }
+    }
+
+    internal func categoryMemoryKey(locationId: String, dayId: String) -> String {
+        "\(locationId)|\(dayId)"
+    }
+
+    internal func itemMemoryKey(locationId: String, dayId: String, categoryId: String) -> String {
+        "\(locationId)|\(dayId)|\(categoryId)|\(dietaryStore.profile.activeFilterCount)"
+    }
+
+    internal func preferredCategory(from categories: [MealCategory]) -> MealCategory? {
+        let recommended = serviceStatus.recommendedMealName
+        return categories.first(where: { $0.name.caseInsensitiveCompare(recommended) == .orderedSame })
+            ?? categories.first(where: { $0.name.localizedCaseInsensitiveContains(recommended) })
+            ?? categories.first
+    }
+
+    private func applyMemoryItems(day: DayMenuGroup, category: MealCategory) {
+        let key = itemMemoryKey(locationId: selectedLocation.id, dayId: day.id, categoryId: category.id)
+        guard let items = itemMemoryCache[key] else { return }
+        menuItems = items
+        isLoadingItems = false
     }
 }

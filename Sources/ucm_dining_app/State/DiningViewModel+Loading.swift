@@ -6,6 +6,7 @@ extension DiningViewModel {
     public func preloadAllMenusIfNeeded() async {
         let completionKey = "all_menus_preloaded_v1"
         if await cacheStore.load(Bool.self, forKey: completionKey) == true {
+            await restorePreloadedMenusFromDisk()
             return
         }
 
@@ -32,6 +33,7 @@ extension DiningViewModel {
                         forKey: "categories_\(location.id)_\(day.id)",
                         expiresAt: menuCacheExpirationDate()
                     )
+                    categoryMemoryCache[categoryMemoryKey(locationId: location.id, dayId: day.id)] = categories
 
                     for category in categories {
                         let items = try await apiClient.fetchMenuItems(
@@ -43,6 +45,7 @@ extension DiningViewModel {
                         )
                         let key = "items_\(location.id)_\(day.id)_\(category.id)_\(dietaryStore.profile.activeFilterCount)"
                         await cacheStore.save(items, forKey: key, expiresAt: menuCacheExpirationDate())
+                        itemMemoryCache[itemMemoryKey(locationId: location.id, dayId: day.id, categoryId: category.id)] = items
                     }
                 }
             }
@@ -102,6 +105,7 @@ extension DiningViewModel {
         if let cached = await cacheStore.loadCached([MealCategory].self, forKey: catCacheKey), !cached.value.isEmpty {
             guard !Task.isCancelled, selectedDayGroup?.id == day.id else { return }
             mealCategories = cached.value
+            categoryMemoryCache[categoryMemoryKey(locationId: selectedLocation.id, dayId: day.id)] = cached.value
             if autoSelectRecommendedMeal || selectedCategory == nil || !mealCategories.contains(where: { $0.id == selectedCategory?.id }) {
                 selectedCategory = pickCategory(from: mealCategories, recommended: evaluation.recommendedMealName)
             }
@@ -119,6 +123,7 @@ extension DiningViewModel {
             if !fetchedCategories.isEmpty {
                 guard !Task.isCancelled, selectedDayGroup?.id == day.id else { return }
                 mealCategories = fetchedCategories
+                categoryMemoryCache[categoryMemoryKey(locationId: selectedLocation.id, dayId: day.id)] = fetchedCategories
                 await cacheStore.save(fetchedCategories, forKey: catCacheKey, expiresAt: menuCacheExpirationDate())
             }
         } catch {
@@ -150,6 +155,7 @@ extension DiningViewModel {
         if let cachedItems {
             guard isCurrentSelection(day: day, category: category), !Task.isCancelled else { return }
             menuItems = cachedItems.value
+            itemMemoryCache[itemMemoryKey(locationId: selectedLocation.id, dayId: day.id, categoryId: category.id)] = cachedItems.value
             isOfflineCachedMode = cachedItems.isExpired
             isLoadingItems = false
             if !revalidate { return }
@@ -167,6 +173,7 @@ extension DiningViewModel {
                 profile: dietaryStore.profile
             )
             loadedItems = items
+            itemMemoryCache[itemMemoryKey(locationId: selectedLocation.id, dayId: day.id, categoryId: category.id)] = items
             isOfflineCachedMode = false
             await cacheStore.save(items, forKey: itemsCacheKey, expiresAt: menuCacheExpirationDate())
         } catch {
@@ -291,5 +298,26 @@ extension DiningViewModel {
         let refreshDeadline = now.addingTimeInterval(30 * 60)
         let nextDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))
         return min(refreshDeadline, nextDay ?? refreshDeadline)
+    }
+
+    private func restorePreloadedMenusFromDisk() async {
+        for location in DiningLocation.defaultLocations {
+            guard let overview = await cacheStore.load(LocationMenuOverview.self, forKey: "overview_\(location.id)") else {
+                continue
+            }
+            for day in overview.menuGroups.filter(\.isDayOfWeek) {
+                let categoryKey = "categories_\(location.id)_\(day.id)"
+                guard let categories = await cacheStore.load([MealCategory].self, forKey: categoryKey) else {
+                    continue
+                }
+                categoryMemoryCache[categoryMemoryKey(locationId: location.id, dayId: day.id)] = categories
+                for category in categories {
+                    let diskKey = "items_\(location.id)_\(day.id)_\(category.id)_\(dietaryStore.profile.activeFilterCount)"
+                    if let items = await cacheStore.load([MenuItemSummary].self, forKey: diskKey) {
+                        itemMemoryCache[itemMemoryKey(locationId: location.id, dayId: day.id, categoryId: category.id)] = items
+                    }
+                }
+            }
+        }
     }
 }

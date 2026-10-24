@@ -52,6 +52,7 @@ struct UCMDiningAppTests {
         let saturdayNoon = calendar.date(from: DateComponents(year: 2026, month: 10, day: 17, hour: 12, minute: 0))!
         let ywdcWeekend = DiningScheduleEvaluator.evaluate(for: .ywdc, at: saturdayNoon)
         #expect(ywdcWeekend.isOpen == false)
+        #expect(ywdcWeekend.currentWeekdayIndex == 7) // Saturday stays selected even though the next service is Monday
     }
 
     @Test("NutritionFactsSummary aggregates and scales FDA nutrition metrics")
@@ -246,4 +247,3 @@ struct UCMDiningAppTests {
         }
     }
 }
-

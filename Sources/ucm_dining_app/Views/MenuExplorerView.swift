@@ -72,17 +72,13 @@ public struct MenuExplorerView: View {
 
     internal func chooseDay(_ day: DayMenuGroup) {
         menuLoadTask?.cancel()
-        withAnimation(.snappy(duration: 0.24)) {
-            viewModel.setSelectedDay(day)
-        }
+        viewModel.setSelectedDay(day)
         menuLoadTask = Task { await viewModel.loadSelectedDay() }
     }
 
     internal func chooseCategory(_ category: MealCategory) {
         menuLoadTask?.cancel()
-        withAnimation(.snappy(duration: 0.24)) {
-            viewModel.setSelectedCategory(category)
-        }
+        viewModel.setSelectedCategory(category)
         menuLoadTask = Task { await viewModel.loadSelectedCategory() }
     }
 }

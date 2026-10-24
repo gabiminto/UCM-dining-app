@@ -117,7 +117,7 @@ public enum DiningScheduleEvaluator {
             statusHeadline: nextHeadline(next, currentWeekday: weekday),
             statusDetail: "Closed",
             recommendedMealName: next.window.meal,
-            currentWeekdayIndex: today.isEmpty ? next.weekday : weekday
+            currentWeekdayIndex: weekday
         )
     }
 
