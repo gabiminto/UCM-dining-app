@@ -4,15 +4,17 @@ import ucm_dining_app
 
 struct DiningMenuEntry: TimelineEntry {
     let date: Date
-    let snapshot: MenuSnapshot
+    let snapshots: [MenuSnapshot]
     let configuration: DiningMenuWidgetConfiguration
+
+    var snapshot: MenuSnapshot { snapshots[0] }
 }
 
 struct DiningMenuProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> DiningMenuEntry {
         DiningMenuEntry(
             date: .now,
-            snapshot: MenuSnapshot(
+            snapshots: [MenuSnapshot(
                 date: .now,
                 locationName: "The Pavilion",
                 mealName: "Lunch",
@@ -22,7 +24,7 @@ struct DiningMenuProvider: AppIntentTimelineProvider {
                     MenuSnapshotItem(name: "Vegetable Stir Fry", iconName: "takeoutbag.and.cup.and.straw.fill"),
                     MenuSnapshotItem(name: "Pasta Primavera", iconName: "fork.knife")
                 ]
-            ),
+            )],
             configuration: DiningMenuWidgetConfiguration()
         )
     }
@@ -45,8 +47,15 @@ struct DiningMenuProvider: AppIntentTimelineProvider {
     }
 
     private func entry(for configuration: DiningMenuWidgetConfiguration) async -> DiningMenuEntry {
-        let snapshot = await MenuSnapshotService().snapshot(for: configuration.diningHall)
-        return DiningMenuEntry(date: snapshot.date, snapshot: snapshot, configuration: configuration)
+        let snapshots: [MenuSnapshot]
+        if configuration.diningHall == .both {
+            async let pavilion = MenuSnapshotService().snapshot(for: DiningLocation.thePavilion)
+            async let ywdc = MenuSnapshotService().snapshot(for: DiningLocation.ywdc)
+            snapshots = await [pavilion, ywdc]
+        } else {
+            snapshots = [await MenuSnapshotService().snapshot(for: configuration.diningHall)]
+        }
+        return DiningMenuEntry(date: snapshots[0].date, snapshots: snapshots, configuration: configuration)
     }
 }
 
@@ -55,6 +64,20 @@ struct DiningMenuWidgetView: View {
     let entry: DiningMenuEntry
 
     var body: some View {
+        Group {
+            if entry.configuration.diningHall == .both, entry.snapshots.count == 2 {
+                bothDiningHalls
+            } else {
+                singleDiningHall(entry.snapshot)
+            }
+        }
+        .containerBackground(for: .widget) {
+            Color(red: 0.00, green: 0.106, blue: 0.227)
+        }
+        .widgetURL(URL(string: "ucmdining://menu?location=\(entry.configuration.diningHall.rawValue)"))
+    }
+
+    private func singleDiningHall(_ snapshot: MenuSnapshot) -> some View {
         VStack(alignment: .leading, spacing: family == .systemMedium ? 7 : 5) {
                 HStack(spacing: 8) {
                     Image(systemName: "fork.knife")
@@ -65,23 +88,23 @@ struct DiningMenuWidgetView: View {
                         .widgetAccentable()
 
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(entry.snapshot.locationName)
+                        Text(snapshot.locationName)
                             .font(family == .systemMedium ? .headline : .subheadline.weight(.bold))
                             .foregroundStyle(.white)
                             .lineLimit(1)
-                        Text(entry.snapshot.mealName.uppercased())
+                        Text(snapshot.mealName.uppercased())
                             .font(.caption2.weight(.bold))
                             .foregroundStyle(gold)
                     }
                 }
 
-                if entry.snapshot.items.isEmpty {
+                if snapshot.items.isEmpty {
                     Text("No menu items listed")
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.72))
                 } else {
                     VStack(alignment: .leading, spacing: 4) {
-                        ForEach(entry.snapshot.items.prefix(itemLimit), id: \.self) { item in
+                        ForEach(snapshot.items.prefix(itemLimit), id: \.self) { item in
                             HStack(spacing: 8) {
                                 Image(systemName: item.iconName)
                                     .font(.caption2.weight(.semibold))
@@ -101,17 +124,68 @@ struct DiningMenuWidgetView: View {
                 Spacer(minLength: 1)
 
                 HStack {
-                    Text(entry.snapshot.status)
+                    Text(snapshot.status)
                     Spacer()
                     Text(entry.date, style: .time)
                 }
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(.white.opacity(0.62))
         }
-        .containerBackground(for: .widget) {
-            Color(red: 0.00, green: 0.106, blue: 0.227)
+    }
+
+    @ViewBuilder
+    private var bothDiningHalls: some View {
+        if family == .systemMedium {
+            HStack(alignment: .top, spacing: 12) {
+                hallTable(entry.snapshots[0], itemCount: 3)
+                Divider().overlay(.white.opacity(0.16))
+                hallTable(entry.snapshots[1], itemCount: 3)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                hallTable(entry.snapshots[0], itemCount: 1)
+                Divider().overlay(.white.opacity(0.16))
+                hallTable(entry.snapshots[1], itemCount: 1)
+            }
         }
-        .widgetURL(URL(string: "ucmdining://menu?location=\(entry.configuration.diningHall.rawValue)"))
+    }
+
+    private func hallTable(_ snapshot: MenuSnapshot, itemCount: Int) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 5) {
+                Image(systemName: "fork.knife")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(gold)
+                Text(snapshot.locationName.replacingOccurrences(of: " Dining", with: ""))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+            }
+            Text(snapshot.mealName.uppercased())
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(gold)
+                .lineLimit(1)
+
+            ForEach(snapshot.items.prefix(itemCount), id: \.self) { item in
+                HStack(spacing: 5) {
+                    Image(systemName: item.iconName)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(gold)
+                        .frame(width: 12)
+                    Text(item.name)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                }
+            }
+
+            if snapshot.items.isEmpty {
+                Text("No items listed")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.65))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var itemLimit: Int {
@@ -145,7 +219,7 @@ struct DiningMenuWidget: Widget {
 } timeline: {
     DiningMenuEntry(
         date: .now,
-        snapshot: MenuSnapshot(
+        snapshots: [MenuSnapshot(
             date: .now,
             locationName: "The Pavilion",
             mealName: "Lunch",
@@ -155,7 +229,7 @@ struct DiningMenuWidget: Widget {
                 MenuSnapshotItem(name: "Vegetable Stir Fry", iconName: "takeoutbag.and.cup.and.straw.fill"),
                 MenuSnapshotItem(name: "Pasta Primavera", iconName: "fork.knife")
             ]
-        ),
+        )],
         configuration: DiningMenuWidgetConfiguration()
     )
 }
