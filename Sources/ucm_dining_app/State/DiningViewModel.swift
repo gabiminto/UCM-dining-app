@@ -150,16 +150,34 @@ public final class DiningViewModel {
     }
 
     public func selectDay(_ day: DayMenuGroup) async {
+        setSelectedDay(day)
+        await loadSelectedDay()
+    }
+
+    public func setSelectedDay(_ day: DayMenuGroup) {
         selectedDayGroup = day
         selectedStation = .all
-        await loadCategoriesAndItems(for: day, autoSelectRecommendedMeal: false)
+    }
+
+    public func loadSelectedDay() async {
+        guard let selectedDayGroup else { return }
+        await loadCategoriesAndItems(for: selectedDayGroup, autoSelectRecommendedMeal: false)
     }
 
     public func selectCategory(_ category: MealCategory) async {
+        setSelectedCategory(category)
+        await loadSelectedCategory()
+    }
+
+    public func setSelectedCategory(_ category: MealCategory) {
         selectedCategory = category
         selectedStation = .all
+    }
+
+    public func loadSelectedCategory() async {
+        guard let selectedCategory else { return }
         if let day = selectedDayGroup {
-            await loadMenuItems(day: day, category: category)
+            await loadMenuItems(day: day, category: selectedCategory)
         }
     }
 

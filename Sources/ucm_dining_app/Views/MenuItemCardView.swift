@@ -98,12 +98,13 @@ public struct MenuItemCardView: View {
     @ViewBuilder
     private var dishArtwork: some View {
         if let imageURL = item.imageUrl.flatMap(URL.init(string:)) {
-            AsyncImage(url: imageURL) { phase in
+            AsyncImage(url: imageURL, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
                 switch phase {
                 case .success(let image):
                     image
                         .resizable()
                         .scaledToFill()
+                        .transition(.opacity)
                 case .empty:
                     artworkFallback
                         .overlay { ProgressView().controlSize(.small) }

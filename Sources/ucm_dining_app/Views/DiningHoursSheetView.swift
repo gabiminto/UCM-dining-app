@@ -167,16 +167,18 @@ public struct DiningHoursSheetView: View {
     }
 
     private var sourceNote: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Hours may change for holidays and academic breaks.", systemImage: "info.circle.fill")
+        VStack(alignment: .center, spacing: 8) {
+            Text("Hours may change for holidays and academic breaks.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-            if let officialHoursURL = URL(string: "https://dining.ucmerced.edu/dining-locations-hours/pavilion/dining-center-hours") {
+                .multilineTextAlignment(.center)
+            if let officialHoursURL = DiningScheduleEvaluator.officialHoursURL {
                 Link("Check official UC Merced dining hours", destination: officialHoursURL)
                     .font(.footnote.weight(.semibold))
+                    .multilineTextAlignment(.center)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 4)
     }
 

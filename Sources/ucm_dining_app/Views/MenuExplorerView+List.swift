@@ -73,9 +73,16 @@ extension MenuExplorerView {
                             selectedItemForSheet = item
                         }
                     )
+                    .transition(
+                        .asymmetric(
+                            insertion: .opacity.combined(with: .offset(y: 10)),
+                            removal: .opacity
+                        )
+                    )
                 }
             }
         }
         .padding(.horizontal, 16)
+        .animation(.easeInOut(duration: 0.22), value: viewModel.filteredItems.map(\.id))
     }
 }

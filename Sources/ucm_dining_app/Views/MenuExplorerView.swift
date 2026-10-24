@@ -7,6 +7,7 @@ public struct MenuExplorerView: View {
 
     @State internal var selectedItemForSheet: MenuItemSummary?
     @State internal var showingHoursSheet: Bool = false
+    @State private var menuLoadTask: Task<Void, Never>?
 
     public init(
         viewModel: DiningViewModel,
@@ -67,5 +68,21 @@ public struct MenuExplorerView: View {
 
     internal var favoritesServingNow: [MenuItemSummary] {
         viewModel.menuItems.filter { favoritesStore.isFavorite(item: $0) }
+    }
+
+    internal func chooseDay(_ day: DayMenuGroup) {
+        menuLoadTask?.cancel()
+        withAnimation(.snappy(duration: 0.24)) {
+            viewModel.setSelectedDay(day)
+        }
+        menuLoadTask = Task { await viewModel.loadSelectedDay() }
+    }
+
+    internal func chooseCategory(_ category: MealCategory) {
+        menuLoadTask?.cancel()
+        withAnimation(.snappy(duration: 0.24)) {
+            viewModel.setSelectedCategory(category)
+        }
+        menuLoadTask = Task { await viewModel.loadSelectedCategory() }
     }
 }

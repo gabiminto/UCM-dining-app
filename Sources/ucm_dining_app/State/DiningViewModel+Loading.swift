@@ -100,6 +100,7 @@ extension DiningViewModel {
         let evaluation = DiningScheduleEvaluator.evaluate(for: selectedLocation)
         let catCacheKey = "categories_\(selectedLocation.id)_\(day.id)"
         if let cached = await cacheStore.loadCached([MealCategory].self, forKey: catCacheKey), !cached.value.isEmpty {
+            guard !Task.isCancelled, selectedDayGroup?.id == day.id else { return }
             mealCategories = cached.value
             if autoSelectRecommendedMeal || selectedCategory == nil || !mealCategories.contains(where: { $0.id == selectedCategory?.id }) {
                 selectedCategory = pickCategory(from: mealCategories, recommended: evaluation.recommendedMealName)
@@ -116,15 +117,18 @@ extension DiningViewModel {
                 dayGroupId: day.id
             )
             if !fetchedCategories.isEmpty {
+                guard !Task.isCancelled, selectedDayGroup?.id == day.id else { return }
                 mealCategories = fetchedCategories
                 await cacheStore.save(fetchedCategories, forKey: catCacheKey, expiresAt: menuCacheExpirationDate())
             }
         } catch {
+            guard !Task.isCancelled, selectedDayGroup?.id == day.id else { return }
             if let cached = await cacheStore.load([MealCategory].self, forKey: catCacheKey), !cached.isEmpty {
                 mealCategories = cached
             }
         }
 
+        guard !Task.isCancelled, selectedDayGroup?.id == day.id else { return }
         if autoSelectRecommendedMeal || selectedCategory == nil || !mealCategories.contains(where: { $0.id == selectedCategory?.id }) {
             selectedCategory = pickCategory(from: mealCategories, recommended: evaluation.recommendedMealName)
         }
@@ -144,6 +148,7 @@ extension DiningViewModel {
         let cachedItems = await cacheStore.loadCached([MenuItemSummary].self, forKey: itemsCacheKey)
 
         if let cachedItems {
+            guard isCurrentSelection(day: day, category: category), !Task.isCancelled else { return }
             menuItems = cachedItems.value
             isOfflineCachedMode = cachedItems.isExpired
             isLoadingItems = false
@@ -176,6 +181,7 @@ extension DiningViewModel {
             }
         }
 
+        guard isCurrentSelection(day: day, category: category), !Task.isCancelled else { return }
         menuItems = loadedItems
         isLoadingItems = false
         await hydrateLiveMacroSnapshots(for: loadedItems, categoryName: category.name)
@@ -273,6 +279,10 @@ extension DiningViewModel {
         categories.first(where: { $0.name.caseInsensitiveCompare(recommended) == .orderedSame })
             ?? categories.first(where: { $0.name.localizedCaseInsensitiveContains(recommended) })
             ?? categories.first
+    }
+
+    private func isCurrentSelection(day: DayMenuGroup, category: MealCategory) -> Bool {
+        selectedDayGroup?.id == day.id && selectedCategory?.id == category.id
     }
 
     private func menuCacheExpirationDate(from now: Date = Date()) -> Date {

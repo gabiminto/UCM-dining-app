@@ -13,6 +13,9 @@ build/
 # macOS
 .DS_Store
 
+# IDE metadata
+.idea/
+
 # Local configuration and secrets
 *.env
 .env*
@@ -21,3 +24,7 @@ build/
 # Test and profiling artifacts
 *.xcresult
 *.trace
+
+# Python tooling
+__pycache__/
+*.pyc

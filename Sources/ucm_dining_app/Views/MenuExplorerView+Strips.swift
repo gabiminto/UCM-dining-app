@@ -9,7 +9,7 @@ extension MenuExplorerView {
                     let isSelected = (day.id == viewModel.selectedDayGroup?.id)
                     let isToday = (day.weekdayIndex == todayWeekday)
                     Button {
-                        Task { await viewModel.selectDay(day) }
+                        chooseDay(day)
                     } label: {
                         VStack(spacing: 2) {
                             if isToday {
@@ -26,6 +26,7 @@ extension MenuExplorerView {
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    .animation(.snappy(duration: 0.24), value: isSelected)
                 }
             }
             .padding(.horizontal, 16)
@@ -39,7 +40,7 @@ extension MenuExplorerView {
                 ForEach(viewModel.mealCategories) { category in
                     let isSelected = (category.id == viewModel.selectedCategory?.id)
                     Button {
-                        Task { await viewModel.selectCategory(category) }
+                        chooseCategory(category)
                     } label: {
                         Text(category.displayName)
                             .font(.subheadline.weight(.semibold))
@@ -53,6 +54,7 @@ extension MenuExplorerView {
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    .animation(.snappy(duration: 0.24), value: isSelected)
                 }
             }
             .padding(.horizontal, 16)
