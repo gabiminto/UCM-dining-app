@@ -28,7 +28,7 @@ public struct DiningHoursSheetView: View {
                     }
                     .padding(16)
                 }
-                .background(Color(.systemGroupedBackground))
+                .background(UCMTheme.screenBackground)
             }
             .navigationTitle("Dining Hours")
             #if os(iOS)
@@ -94,11 +94,7 @@ public struct DiningHoursSheetView: View {
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
-        }
+        .ucmSurfaceCard(cornerRadius: 20)
     }
 
     private func scheduleGroup(

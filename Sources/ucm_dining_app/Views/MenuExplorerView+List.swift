@@ -40,6 +40,16 @@ extension MenuExplorerView {
 
     internal var dishesListSection: some View {
         VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(viewModel.selectedCategory?.displayName ?? "Menu")
+                    .font(.title3.weight(.bold))
+                Spacer()
+                Text("\(viewModel.filteredItems.count) items")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 2)
+
             if viewModel.isLoadingItems {
                 HStack {
                     Spacer()

@@ -22,7 +22,7 @@ public struct MenuHeroHeaderView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(selectedLocation.displayName)
@@ -43,11 +43,12 @@ public struct MenuHeroHeaderView: View {
                 Spacer()
 
                 Button(action: onOpenHours) {
-                    Image(systemName: "clock")
-                        .font(.system(size: 15, weight: .semibold))
+                    Label("Hours", systemImage: "clock")
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(.white)
-                        .padding(8)
-                        .background(Color.white.opacity(0.15), in: Circle())
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 44)
+                        .background(Color.white.opacity(0.12), in: Capsule())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Dining Hours")
@@ -63,12 +64,9 @@ public struct MenuHeroHeaderView: View {
                             Text(loc.displayName)
                                 .font(.subheadline.weight(.semibold))
                                 .padding(.horizontal, 14)
-                                .padding(.vertical, 8)
-                                .foregroundStyle(isSelected ? UCMTheme.deepNavy : .white)
-                                .background(
-                                    isSelected ? UCMTheme.brightGold : Color.white.opacity(0.12),
-                                    in: Capsule()
-                                )
+                                .frame(minHeight: 44)
+                                .foregroundStyle(isSelected ? .white : .white.opacity(0.9))
+                                .ucmGlassControl(isSelected: isSelected)
                         }
                         .buttonStyle(.plain)
                         .accessibilityAddTraits(isSelected ? .isSelected : [])
@@ -78,8 +76,8 @@ public struct MenuHeroHeaderView: View {
             .scrollIndicators(.hidden)
         }
         .padding(.horizontal, 16)
-        .padding(.top, 10)
-        .padding(.bottom, 14)
+        .padding(.top, 12)
+        .padding(.bottom, 16)
         .background(UCMTheme.deepNavy.ignoresSafeArea(edges: .top))
     }
 }

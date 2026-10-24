@@ -1,6 +1,7 @@
 import SwiftUI
 
 public struct MenuExplorerView: View {
+    @Environment(\.accessibilityReduceMotion) internal var reduceMotion
     @Bindable public var viewModel: DiningViewModel
     public let dietaryStore: DietaryProfileStore
     public let favoritesStore: FavoritesStore
@@ -42,7 +43,8 @@ public struct MenuExplorerView: View {
 
                     dishesListSection
                 }
-                .padding(.vertical, 12)
+                .padding(.top, 14)
+                .padding(.bottom, 24)
             }
             .scrollIndicators(.hidden)
             .background(UCMTheme.screenBackground)

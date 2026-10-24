@@ -46,7 +46,7 @@ public struct UCMDiningRootView: View {
                 }
             )
             .tabItem {
-                Label("Dietary & Goals", systemImage: "checkmark.shield.fill")
+                Label("Preferences", systemImage: "checkmark.shield.fill")
             }
             .tag(2)
         }

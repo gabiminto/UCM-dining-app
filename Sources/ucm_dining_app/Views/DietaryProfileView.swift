@@ -70,7 +70,7 @@ public struct DietaryProfileView: View {
                 }
 
             }
-            .navigationTitle("Dietary & Goals")
+            .navigationTitle("Menu Preferences")
             .toolbar {
                 if dietaryStore.profile.hasActiveFilters {
                     ToolbarItem(placement: .primaryAction) {

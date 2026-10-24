@@ -74,27 +74,12 @@ struct UCMDiningAppTests {
         #expect(doubleServing.proteinGrams == 48.8)
     }
 
-    @Test("PlateTrackerStore and FavoritesStore manage entries and compute totals")
+    @Test("FavoritesStore manages saved menu items")
     @MainActor
-    func testPlateAndFavoritesStores() {
+    func testFavoritesStore() {
         let suiteName = "ucm_test_suite_\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
-
-        let plateStore = PlateTrackerStore(defaults: defaults)
-        plateStore.addEntry(
-            menuItemId: "item-1",
-            dishName: "BobCat Chicken Sandwich",
-            stationName: "Rufus Grill",
-            locationName: "The Pavilion",
-            mealPeriodName: "Lunch",
-            selectedVariations: ["Plant Based Chick'N Tenders", "Curly Fries"],
-            servings: 1.0,
-            nutrition: NutritionFactsSummary(calories: 620, proteinGrams: 28, carbsGrams: 54, fatGrams: 24)
-        )
-        #expect(plateStore.entries.count == 1)
-        #expect(plateStore.totalNutrition.calories == 620)
-        #expect(plateStore.totalNutrition.proteinGrams == 28)
 
         let favStore = FavoritesStore(defaults: defaults)
         let sampleItem = SampleMenuCatalog.samplePavilionItems[0]

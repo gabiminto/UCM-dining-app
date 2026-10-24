@@ -35,13 +35,6 @@ public enum UCMTheme {
     #endif
     public static let subtleBorder = Color.primary.opacity(0.08)
 
-    /// Hero Header Gradient
-    public static let heroGradient = LinearGradient(
-        colors: [deepNavy, navy, Color(red: 0.04, green: 0.23, blue: 0.45)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
     public static func stationColor(_ station: StationCategory) -> Color {
         switch station {
         case .all:
@@ -102,6 +95,34 @@ public extension View {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(UCMTheme.subtleBorder, lineWidth: 1)
                 }
+        }
+    }
+
+    func ucmSurfaceCard(cornerRadius: CGFloat = 18) -> some View {
+        background(UCMTheme.cardBackground, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(UCMTheme.subtleBorder, lineWidth: 1)
+            }
+    }
+
+    @ViewBuilder
+    func ucmGlassControl(isSelected: Bool = false) -> some View {
+        if #available(iOS 26.0, macOS 26.0, *) {
+            glassEffect(
+                isSelected
+                    ? .regular.tint(UCMTheme.deepNavy).interactive()
+                    : .regular.interactive(),
+                in: .capsule
+            )
+        } else {
+            background(
+                isSelected ? UCMTheme.deepNavy : UCMTheme.cardBackground,
+                in: Capsule()
+            )
+            .overlay {
+                Capsule().strokeBorder(UCMTheme.subtleBorder, lineWidth: 1)
+            }
         }
     }
 }

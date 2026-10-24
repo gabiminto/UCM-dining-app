@@ -22,11 +22,12 @@ extension MenuExplorerView {
                                 .foregroundStyle(isSelected ? .white : .primary)
                         }
                         .frame(minWidth: 54, minHeight: 44)
-                        .background(isSelected ? UCMTheme.deepNavy : Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .padding(.horizontal, 4)
+                        .ucmGlassControl(isSelected: isSelected)
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
-                    .animation(.snappy(duration: 0.24), value: isSelected)
+                    .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: isSelected)
                 }
             }
             .padding(.horizontal, 16)
@@ -45,16 +46,13 @@ extension MenuExplorerView {
                         Text(category.displayName)
                             .font(.subheadline.weight(.semibold))
                             .padding(.horizontal, 14)
-                            .padding(.vertical, 7)
+                            .frame(minHeight: 44)
                             .foregroundStyle(isSelected ? .white : .primary)
-                            .background(
-                                isSelected ? UCMTheme.deepNavy : Color.primary.opacity(0.06),
-                                in: Capsule()
-                            )
+                            .ucmGlassControl(isSelected: isSelected)
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
-                    .animation(.snappy(duration: 0.24), value: isSelected)
+                    .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: isSelected)
                 }
             }
             .padding(.horizontal, 16)

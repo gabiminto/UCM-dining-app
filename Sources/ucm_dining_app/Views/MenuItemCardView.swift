@@ -92,7 +92,7 @@ public struct MenuItemCardView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(isFavorite ? "Remove from Favorites" : "Add to Favorites")
         }
-        .ucmGlassCard(interactive: true)
+        .ucmSurfaceCard()
     }
 
     @ViewBuilder
